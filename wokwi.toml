@@ -1,0 +1,13 @@
+[project]
+name = "Sistema de Monitoramento de Água"
+description = "Simulação de controle de consumo de água com limite diário e liberação de bônus via MQTT seguro"
+firmware = "sketch.ino"
+board = "esp32-devkit-v1"
+
+[env]
+# Ambiente para o WiFiClientSecure
+INCLUDE = "WiFiClientSecure.h,PubSubClient.h,Wire.h,LiquidCrystal_I2C.h"
+
+[simulator]
+# Configurações opcionais de simulação (não obrigatório no seu caso)
+
