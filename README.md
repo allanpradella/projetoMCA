@@ -1,99 +1,74 @@
 # 💧 Sistema de Monitoramento de Consumo de Água com Limite Diário (ONU)
 
-Este projeto simula um sistema inteligente de controle e monitoramento do consumo de água, com base nas recomendações da ONU para consumo diário de até 110 litros por pessoa. O sistema interrompe o fornecimento de água ao atingir esse limite e permite a liberação de bônus manuais de uso por meio de um botão físico.
+Este projeto simula um sistema inteligente de controle e monitoramento do consumo de água com base no limite sugerido pela ONU (110L por pessoa/dia). Desenvolvido com ESP32, LCD I2C e comunicação MQTT com integração à plataforma **ThingsBoard Cloud** para visualização remota dos dados.
 
 ---
 
-## 📌 Funcionalidades
+## 🚀 Funcionalidades
 
-- ✅ Monitoramento do consumo de água em tempo real (simulado)
-- ✅ Visualização do consumo e fluxo atual em LCD 16x2
-- ✅ Corte automático do fornecimento ao atingir o limite de 110L
-- ✅ Liberação de bônus de +20L por botão físico
-- ✅ Indicação visual com LED quando a válvula estiver fechada
-- ✅ Comunicação MQTT com broker seguro HiveMQ Cloud (TLS)
-
----
-
-## 🧠 Tecnologias Utilizadas
-
-- ESP32 DevKit v1
-- LCD I2C 16x2
-- Módulo Relé (simulando válvula solenoide)
-- LED (indicador de válvula fechada)
-- Push Button (liberação de bônus)
-- Protocolo MQTT com autenticação TLS
-- HiveMQ Cloud Serverless MQTT Broker
-- Simulação via [Wokwi](https://wokwi.com/)
+- ✅ Monitoramento contínuo do consumo simulado de água
+- 🚫 Válvula (simulada) é fechada ao atingir o limite de consumo
+- 🔘 Botão libera bônus de +20L por vez
+- 📟 Display LCD 16x2 mostra consumo e status em tempo real
+- 📤 Dados enviados via MQTT para **ThingsBoard Cloud**
+- 💡 LED indica se a válvula está fechada
+- 📊 Painel de monitoramento remoto e gráfico
 
 ---
 
-## ⚙️ Configuração
+## 📦 Componentes Simulados
 
-### 📁 Estrutura do projeto
-
-
-
-### 🔧 Parâmetros de simulação
-
-- Consumo simulado: `1 litro por segundo`
-- Limite diário padrão: `110 litros`
-- Bônus por botão: `20 litros`
-- Comunicação via: `broker MQTT HiveMQ Cloud`
-- Porta: `8883` (TLS)
+- **ESP32 DevKit V1**
+- **LCD 16x2 I2C**
+- **Módulo Relé**
+- **LED Vermelho** (simula a válvula solenoide fechada)
+- **Pushbutton** (liberação de bônus)
+- **Broker MQTT (ThingsBoard Cloud)**
 
 ---
 
-## 📡 Comunicação MQTT
+## 🌐 Comunicação MQTT
 
-- **Broker**: `2036808a441b471f9b917cab5abc5d08.s1.eu.hivemq.cloud`
-- **Porta**: `8883`
-- **Username**: `allan_user`
-- **Password**: `Senha123`
-- **Tópico**: `casa/agua`
+- **Broker**: `mqtt.thingsboard.cloud`
+- **Porta**: `1883`
+- **Tópico**: `v1/devices/me/telemetry`
+- **Usuário (token do device)**: `JUAcqz8Sp52UcNl7FlGA`
+- **Senha**: *(deixe em branco)*
 
-As mensagens são publicadas automaticamente com atualizações de consumo e alertas de válvula.
+###  🖥 Exibição no LCD
+Linha 1: Consumo: XX.XXL
 
----
+Linha 2: Fluxo: 10.0L/s (simulado)
 
-## 🖥️ LCD 16x2 (Display)
+Quando o limite é atingido:
+Exibe: Limite atingido
 
-- Linha 1: `Consumo: 45.00L` ou `Limite atingido`
-- Linha 2: `Fluxo: 1.00 L/s` ou `Liberações: X`
+Abaixo: Liberações: N
 
----
+Quando o botão é pressionado:
+Exibe: Uso liberado
 
-## 🔘 Botão
+Abaixo: Bonus #N
 
-- Ao pressionar o botão **quando a válvula estiver fechada**, libera-se mais **20L** de consumo.
-- O número de liberações é contabilizado e exibido no LCD e no Serial.
+### 🛠 Instruções para Rodar no Wokwi
+Acesse: https://wokwi.com
 
----
+Importe os arquivos diagram.json e sketch.ino
 
-## 🚨 LED Indicador
+Certifique-se de que:
 
-- **Apagado** = válvula aberta (fluxo de água liberado)
-- **Aceso** = válvula fechada (limite diário atingido)
+O LCD está ligado ao VIN
 
----
+Pinos SDA/SCL conectados ao D21 e D22
 
-## 🚀 Simule agora
+Rode a simulação — os dados começarão a aparecer no ThingsBoard
 
-Você pode simular o projeto completo gratuitamente em:
+### 📊 Painel no ThingsBoard
+Crie um Device no ThingsBoard Cloud
 
-👉 https://wokwi.com/projects/429592043413401601
+Copie o Token fornecido (ex: JUAcqz8Sp52UcNl7FlGA)
 
----
+Vá até Latest Telemetry para ver os dados chegando
 
-## 📄 Licença
-
-Este projeto é livre para fins educacionais e está sob a licença MIT.
-
----
-
-## 👨‍💻 Autor
-
-**Allan Pradella**  
-Monitoramento do Consumo de Água	: Implementação de Sistema de Monitoramento com NodeMCU e MQTT. — Mackenzie  
-ODS 6 — Água potável e saneamento
+(Opcional) Crie um Dashboard com gráficos e indicadores para visualização.
 

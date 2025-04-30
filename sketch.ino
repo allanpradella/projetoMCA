@@ -1,17 +1,18 @@
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <LiquidCrystal_I2C.h>
 
+// Wi-Fi
 const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
-const char* mqtt_server = "2036808a441b471f9b917cab5abc5d08.s1.eu.hivemq.cloud";
-const int mqtt_port = 8883;
-const char* mqtt_username = "allan_user";
-const char* mqtt_password = "Senha123";
+// MQTT ThingsBoard
+const char* mqtt_server = "mqtt.thingsboard.cloud";
+const int mqtt_port = 1883;
+const char* mqtt_username = "JUAcqz8Sp52UcNl7FlGA"; // Token do device
+const char* mqtt_password = ""; // Senha vazia
 
-WiFiClientSecure espClient;
+WiFiClient espClient;
 PubSubClient client(espClient);
 
 // Pinos
@@ -26,13 +27,11 @@ float limiteLitros = 110.0;
 float bonusLitros = 20.0;
 int bonusLiberadoContador = 0;
 
-// LCD
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// Simulação
 const float ml_per_intervalo = 10000.0; // Simula 10L/s
 
-// Botão - debounce + controle de estado
+// Botão - debounce
 unsigned long lastButtonPress = 0;
 const unsigned long debounceDelay = 300;
 bool botaoPressionadoAnterior = HIGH;
@@ -60,10 +59,9 @@ void setup() {
   }
   Serial.println("\nWi-Fi conectado!");
 
-  espClient.setInsecure();
   client.setServer(mqtt_server, mqtt_port);
 
-  reconnect(); // Conecta antes de mostrar status
+  reconnect();
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -81,7 +79,6 @@ void reconnect() {
     Serial.println("Tentando conectar ao MQTT...");
     if (client.connect("ESP32Client", mqtt_username, mqtt_password)) {
       Serial.println("Conectado ao MQTT!");
-      client.subscribe("casa/agua");
     } else {
       Serial.print("Falha MQTT, rc=");
       Serial.print(client.state());
@@ -98,9 +95,8 @@ void loop() {
   static unsigned long lastMeasure = 0;
   unsigned long now = millis();
 
-  // Leitura do botão com detecção de transição e debounce
+  // Leitura do botão
   bool estadoBotaoAtual = digitalRead(buttonPin);
-
   if (estadoBotaoAtual == LOW && botaoPressionadoAnterior == HIGH && (now - lastButtonPress > debounceDelay)) {
     lastButtonPress = now;
     botaoPressionadoAnterior = LOW;
@@ -127,12 +123,10 @@ void loop() {
     }
   }
 
-  // Atualiza o estado anterior
   if (estadoBotaoAtual == HIGH && botaoPressionadoAnterior == LOW) {
     botaoPressionadoAnterior = HIGH;
   }
 
-  // Atualização a cada 1s
   if (now - lastMeasure >= 1000) {
     lastMeasure = now;
 
@@ -151,7 +145,9 @@ void loop() {
       Serial.print(consumoLitros);
       Serial.println(" L");
 
-      client.publish("casa/agua", ("Consumo atual: " + String(consumoLitros, 2) + " L").c_str());
+      // Payload JSON para ThingsBoard
+      String payload = "{\"litros\":" + String(consumoLitros, 2) + "}";
+      client.publish("v1/devices/me/telemetry", payload.c_str());
 
       if (consumoLitros >= limiteLitros) {
         valvulaFechada = true;
@@ -159,8 +155,6 @@ void loop() {
         digitalWrite(ledValvePin, HIGH);
 
         Serial.println("VÁLVULA FECHADA: Limite diário atingido.");
-        client.publish("casa/agua", "VÁLVULA FECHADA: Limite diário atingido.");
-
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Limite atingido");
