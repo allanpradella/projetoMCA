@@ -1,0 +1,63 @@
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 10.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 20.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 30.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 40.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 50.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 60.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 70.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 80.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 90.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 100.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 110.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 120.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 130.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 140.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 150.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 160.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 170.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 10.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 20.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 30.00 L
+Topic: valvula/telemetria
+QoS: 0
+Consumo atual: 40.00 L
