@@ -1,7 +1,6 @@
-// -------- Config MQTT HiveMQ Cloud --------
-//Monitoramento do Consumo de Água: 
-//Implementação de Sistema de Monitoramento com 
-//NodeMCU e MQTT.
+// ----- Monitoramento do Consumo de Água	: Implementação de Sistema de Monitoramento com NodeMCU e MQTT.-----
+
+// -------- Monitoramento do Consumo de Água com ESP32 e MQTT (HiveMQ Cloud) --------
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -44,7 +43,7 @@ PubSubClient client(espClient);
 
 // -------- Publica Status --------
 void publicarStatus(String status) {
-  client.publish("valvula/status", status.c_str());
+  client.publish("device/esp32/status", status.c_str());
   Serial.println("Status: " + status);
 }
 
@@ -57,8 +56,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Mensagem recebida: ");
   Serial.println(mensagem);
 
-  if (String(topic) == "valvula/control" && mensagem == "abrir") {
-    liberarAgua();
+  if (String(topic) == "device/esp32/command") {
+    if (mensagem == "abrir") {
+      liberarAgua();
+    } else if (mensagem == "fechar") {
+      fecharValvula();
+    }
   }
 }
 
@@ -83,6 +86,25 @@ void liberarAgua() {
     publicarStatus("Uso liberado, Liberacao #" + String(bonusLiberadoContador));
 
     delay(1000);
+  }
+}
+
+// -------- Função fechar válvula --------
+void fecharValvula() {
+  if (!valvulaFechada) {
+    valvulaFechada = true;
+    digitalWrite(relayPin, HIGH);
+    digitalWrite(ledValvePin, HIGH);
+
+    Serial.println("Válvula fechada via MQTT.");
+
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Valvula fechada");
+    lcd.setCursor(0, 1);
+    lcd.print("por comando");
+
+    publicarStatus("Válvula fechada via comando MQTT");
   }
 }
 
@@ -120,7 +142,7 @@ void setup() {
   lcd.print("WiFi OK");
   publicarStatus("Wi-Fi conectado!");
 
-  espClient.setInsecure();  
+  espClient.setInsecure();
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
@@ -151,7 +173,7 @@ void reconnect() {
     Serial.print("Tentando conectar MQTT...");
     if (client.connect("ESP32Client", mqtt_user, mqtt_password)) {
       Serial.println("Conectado!");
-      client.subscribe("valvula/control");
+      client.subscribe("device/esp32/command");
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("MQTT OK");
@@ -199,10 +221,10 @@ void loop() {
       lcd.setCursor(0, 1);
       lcd.print("Fluxo: 10.0L/s ");
 
-      String consumoStr = "Consumo atual: " + String(consumoLitros, 2) + " L";
-      Serial.println(consumoStr);
+      String consumoStr = "{\"litros\":" + String(consumoLitros, 2) + "}";
+      Serial.println("Telemetria: " + consumoStr);
 
-      client.publish("valvula/telemetria", consumoStr.c_str());
+      client.publish("device/esp32/telemetry", consumoStr.c_str());
 
       if (consumoLitros >= limiteLitros) {
         valvulaFechada = true;
@@ -222,3 +244,5 @@ void loop() {
     }
   }
 }
+
+
