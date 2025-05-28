@@ -1,63 +1,42 @@
-Topic: valvula/telemetria
+Topic: device/esp32/status
 QoS: 0
-Consumo atual: 10.00 L
-Topic: valvula/telemetria
+MQTT conectado!
+Topic: device/esp32/status
 QoS: 0
-Consumo atual: 20.00 L
-Topic: valvula/telemetria
+Wi-Fi + MQTT OK
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 30.00 L
-Topic: valvula/telemetria
+{"litros":10.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 40.00 L
-Topic: valvula/telemetria
+{"litros":20.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 50.00 L
-Topic: valvula/telemetria
+{"litros":30.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 60.00 L
-Topic: valvula/telemetria
+{"litros":40.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 70.00 L
-Topic: valvula/telemetria
+{"litros":50.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 80.00 L
-Topic: valvula/telemetria
+{"litros":60.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 90.00 L
-Topic: valvula/telemetria
+{"litros":70.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 100.00 L
-Topic: valvula/telemetria
+{"litros":80.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 110.00 L
-Topic: valvula/telemetria
+{"litros":90.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 120.00 L
-Topic: valvula/telemetria
+{"litros":100.00}
+Topic: device/esp32/telemetry
 QoS: 0
-Consumo atual: 130.00 L
-Topic: valvula/telemetria
+{"litros":110.00}
+Topic: device/esp32/status
 QoS: 0
-Consumo atual: 140.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 150.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 160.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 170.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 10.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 20.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 30.00 L
-Topic: valvula/telemetria
-QoS: 0
-Consumo atual: 40.00 L
+Válvula fechada

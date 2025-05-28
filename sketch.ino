@@ -1,7 +1,4 @@
-// ----- Monitoramento do Consumo de Água	: Implementação de Sistema de Monitoramento com NodeMCU e MQTT.-----
-
-// -------- Monitoramento do Consumo de Água com ESP32 e MQTT (HiveMQ Cloud) --------
-
+// ----- Monitoramento do Consumo de Água: Implementação de Sistema de Monitoramento com ESP32 e MQTT -----
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
@@ -30,19 +27,20 @@ float bonusLitros = 20.0;
 int bonusLiberadoContador = 0;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-const float ml_per_intervalo = 10000.0;  // Simula 10L/s
+const float litros_por_segundo = 10.0;  // Simula fluxo de 10L/s
 
-// Botão físico
 unsigned long lastButtonPress = 0;
-const unsigned long debounceDelay = 300;
+const unsigned long debounceDelay = 100;
 bool botaoPressionadoAnterior = HIGH;
 
-// MQTT
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
+unsigned long lastWifiCheck = 0;
+const unsigned long wifiCheckInterval = 5000;  // 5 segundos
+
 // -------- Publica Status --------
-void publicarStatus(String status) {
+void publicarStatus(const String& status) {
   client.publish("device/esp32/status", status.c_str());
   Serial.println("Status: " + status);
 }
@@ -55,6 +53,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.print("Mensagem recebida: ");
   Serial.println(mensagem);
+
+// -------- Comando MQTT  --------
 
   if (String(topic) == "device/esp32/command") {
     if (mensagem == "abrir") {
@@ -84,8 +84,6 @@ void liberarAgua() {
     lcd.print(bonusLiberadoContador);
 
     publicarStatus("Uso liberado, Liberacao #" + String(bonusLiberadoContador));
-
-    delay(1000);
   }
 }
 
@@ -96,7 +94,7 @@ void fecharValvula() {
     digitalWrite(relayPin, HIGH);
     digitalWrite(ledValvePin, HIGH);
 
-    Serial.println("Válvula fechada via MQTT.");
+    Serial.println("Válvula fechada");
 
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -104,7 +102,7 @@ void fecharValvula() {
     lcd.setCursor(0, 1);
     lcd.print("por comando");
 
-    publicarStatus("Válvula fechada via comando MQTT");
+    publicarStatus("Válvula fechada");
   }
 }
 
@@ -124,30 +122,13 @@ void setup() {
   lcd.print("Iniciando...");
   publicarStatus("Iniciando...");
 
-  WiFi.begin(ssid, password);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Conect WiFi...");
-  publicarStatus("Conectando Wi-Fi...");
+  conectarWiFi();
 
-  Serial.print("Conectando Wi-Fi...");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWi-Fi conectado!");
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("WiFi OK");
-  publicarStatus("Wi-Fi conectado!");
-
-  espClient.setInsecure();
-
+  espClient.setInsecure();  // Apenas para testes
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 
-  reconnect();
+  conectarMQTT();
 
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -162,8 +143,40 @@ void setup() {
   lcd.print("Fluxo: 10.0L/s");
 }
 
-// -------- Reconectar MQTT --------
-void reconnect() {
+// -------- Conectar WiFi --------
+void conectarWiFi() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Conect WiFi...");
+  publicarStatus("Conectando Wi-Fi...");
+
+  WiFi.begin(ssid, password);
+
+  unsigned long startAttempt = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < 15000) {  // 15s timeout
+    delay(500);
+    Serial.print(".");
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWi-Fi conectado!");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("WiFi OK");
+    publicarStatus("Wi-Fi conectado!");
+  } else {
+    Serial.println("\nFalha ao conectar Wi-Fi");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("WiFi falhou");
+    publicarStatus("Wi-Fi falhou");
+  }
+}
+
+// -------- Conectar MQTT --------
+void conectarMQTT() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Conect MQTT...");
@@ -174,6 +187,7 @@ void reconnect() {
     if (client.connect("ESP32Client", mqtt_user, mqtt_password)) {
       Serial.println("Conectado!");
       client.subscribe("device/esp32/command");
+
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("MQTT OK");
@@ -189,11 +203,23 @@ void reconnect() {
 
 // -------- Loop principal --------
 void loop() {
-  if (!client.connected()) reconnect();
-  client.loop();
-
   unsigned long now = millis();
-  static unsigned long lastMeasure = 0;
+
+  // Checa WiFi periodicamente
+  if (now - lastWifiCheck > wifiCheckInterval) {
+    lastWifiCheck = now;
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("Wi-Fi desconectado. Reconectando...");
+      conectarWiFi();
+      delay(1000);
+    }
+    if (!client.connected()) {
+      Serial.println("MQTT desconectado. Reconectando...");
+      conectarMQTT();
+    }
+  }
+
+  client.loop();
 
   // Botão físico
   bool estadoBotaoAtual = digitalRead(buttonPin);
@@ -207,19 +233,20 @@ void loop() {
   }
 
   // Consumo
+  static unsigned long lastMeasure = 0;
   if (now - lastMeasure >= 1000) {
     lastMeasure = now;
 
     if (!valvulaFechada) {
-      consumoLitros += ml_per_intervalo / 1000.0;
+      consumoLitros += litros_por_segundo;
 
       lcd.setCursor(0, 0);
       lcd.print("Consumo: ");
       lcd.print(consumoLitros, 2);
-      lcd.print("L    ");
+      lcd.print("L   ");
 
       lcd.setCursor(0, 1);
-      lcd.print("Fluxo: 10.0L/s ");
+      lcd.print("Fluxo: 10.0L/s");
 
       String consumoStr = "{\"litros\":" + String(consumoLitros, 2) + "}";
       Serial.println("Telemetria: " + consumoStr);
@@ -227,11 +254,8 @@ void loop() {
       client.publish("device/esp32/telemetry", consumoStr.c_str());
 
       if (consumoLitros >= limiteLitros) {
-        valvulaFechada = true;
-        digitalWrite(relayPin, HIGH);
-        digitalWrite(ledValvePin, HIGH);
+        fecharValvula();
 
-        Serial.println("VÁLVULA FECHADA: Limite diário atingido.");
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Limite atingido");
@@ -244,5 +268,4 @@ void loop() {
     }
   }
 }
-
-
+// -------- ALLAN PRADELLA FRUSHIO --------

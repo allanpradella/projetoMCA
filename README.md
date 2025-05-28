@@ -69,10 +69,10 @@ LED → Pino 2
 ### Monitoramento:
 
 Acesse HiveMQ Web Client [ https://console.hivemq.cloud/ ]
-Inscreva-se no tópico agua/consumo
+Inscreva-se no tópico agua/consumo ou em todos 
 
 ## 📊 Dashboard 
-![Texto Alternativo](./imagem 3.png)
+![Texto Alternativo](.images/imagem 3.png)
 
 ## 🎥 Demonstração
 https://youtu.be/_3sNX8N_Xhc
